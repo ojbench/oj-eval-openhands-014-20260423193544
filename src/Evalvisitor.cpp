@@ -671,9 +671,8 @@ Value EvalVisitor::callFunction(const std::string& name, const std::vector<Value
     
     enterScope();
     
-    for (const auto& pair : func->capturedScope) {
-        setVariable(pair.first, pair.second);
-    }
+    // Don't use captured scope, just use current global scope
+    // This allows access to all global variables defined before or after function definition
     
     size_t argIdx = 0;
     for (size_t i = 0; i < func->params.size(); i++) {
@@ -728,10 +727,6 @@ std::any EvalVisitor::visitFuncdef(Python3Parser::FuncdefContext *ctx) {
             Value defVal = std::any_cast<Value>(visit(test));
             func->defaults.push_back(defVal);
         }
-    }
-    
-    for (const auto& pair : globalScope) {
-        func->capturedScope[pair.first] = pair.second;
     }
     
     Value funcValue;
