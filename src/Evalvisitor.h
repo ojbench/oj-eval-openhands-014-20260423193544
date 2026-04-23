@@ -164,6 +164,7 @@ public:
     std::any visitAtom_expr(Python3Parser::Atom_exprContext *ctx) override;
     std::any visitTrailer(Python3Parser::TrailerContext *ctx) override;
     std::any visitAtom(Python3Parser::AtomContext *ctx) override;
+    std::any visitFormat_string(Python3Parser::Format_stringContext *ctx) override;
     std::any visitTestlist(Python3Parser::TestlistContext *ctx) override;
     std::any visitArglist(Python3Parser::ArglistContext *ctx) override;
     std::any visitArgument(Python3Parser::ArgumentContext *ctx) override;

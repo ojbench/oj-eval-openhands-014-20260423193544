@@ -1185,6 +1185,54 @@ std::any EvalVisitor::visitAtom(Python3Parser::AtomContext *ctx) {
     return Value();
 }
 
+std::any EvalVisitor::visitFormat_string(Python3Parser::Format_stringContext *ctx) {
+    std::string result = "";
+    
+    auto literals = ctx->FORMAT_STRING_LITERAL();
+    auto testlists = ctx->testlist();
+    
+    size_t litIdx = 0;
+    size_t testIdx = 0;
+    
+    // Iterate through children to maintain order
+    auto children = ctx->children;
+    for (size_t i = 0; i < children.size(); i++) {
+        auto child = children[i];
+        
+        // Check if it's a terminal node
+        if (auto terminal = dynamic_cast<antlr4::tree::TerminalNode*>(child)) {
+            std::string text = terminal->getText();
+            
+            // Skip format quotation and regular quotation
+            if (text == "f\"" || text == "F\"" || text == "f'" || text == "F'" ||
+                text == "\"" || text == "'") {
+                continue;
+            }
+            
+            // Skip braces
+            if (text == "{" || text == "}") {
+                continue;
+            }
+            
+            // This is a FORMAT_STRING_LITERAL
+            result += text;
+        } 
+        // Check if it's a testlist node
+        else if (dynamic_cast<Python3Parser::TestlistContext*>(child)) {
+            if (testIdx < testlists.size()) {
+                auto tests = testlists[testIdx]->test();
+                if (tests.size() == 1) {
+                    Value val = std::any_cast<Value>(visit(tests[0]));
+                    result += val.toString();
+                }
+                testIdx++;
+            }
+        }
+    }
+    
+    return Value(result);
+}
+
 std::any EvalVisitor::visitTestlist(Python3Parser::TestlistContext *ctx) {
     auto tests = ctx->test();
     
